@@ -1,4 +1,5 @@
 # Definir los tokens y palabras reservadas
+# Cada token tiene asociado su representación en el lenguaje.
 tokens = {
     'tkn_ejecuta': '->',
     'tkn_potencia': '**',
@@ -44,7 +45,9 @@ tokens = {
     'tkn_exclamacion': '!'
 }
 
+
 # Palabras reservadas en minúsculas
+# Estas palabras tienen un significado especial en la sintaxis del lenguaje y no pueden usarse como identificadores
 palabras_reservadas = {
     'range', 'object', 'False', 'None', 'True', 'and', 'as', 'assert', 'async', 'await', 'break',
     'class', 'continue', 'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global',
@@ -52,7 +55,8 @@ palabras_reservadas = {
     'try', 'self', 'while', 'with', 'yield', 'init'
 }
 
-# Tipos de datos
+# Tipos de datos básicos del lenguaje
+# Cada tipo de dato se asocia con su palabra clave en el lenguaje
 tipos_datos = {
     'int': 'int',
     'float': 'float',
