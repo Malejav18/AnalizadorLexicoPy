@@ -1,4 +1,3 @@
-
 from tokens_palabras import tokens, palabras_reservadas, tipos_datos
 
 def es_identificador(cadena):
@@ -11,7 +10,7 @@ def es_identificador(cadena):
             return False  # Solo se permiten letras, números y guion bajo
     return True  # Si pasa todas las validaciones, es un identificador válido
 
-def analizar_lexico(codigo):
+def analizar_lexico(codigo):x
     fila = 0  # Inicializa el contador de filas (líneas de código)
     columna = 0  # Inicializa el contador de columnas (posición en la línea)
     palabra = ''  # Variable para almacenar la palabra actual en análisis
