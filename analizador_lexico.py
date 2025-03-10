@@ -28,8 +28,12 @@ def es_token(char):
         return True
     return False
 
-def es_cadena(char):
-    if char == '"' or char == "'":
+def es_cadena_simple(char):
+    if char == "'":
+        return True
+    return False
+def es_cadena_doble(char):
+    if char == '"':
         return True
     return False
 
@@ -91,7 +95,7 @@ def analizar_lexico(codigo, salida):
                 if es_token(char):  # Si el carácter es un token válido
                     check = False #Bandera para revisar si los dos tokens en conjunto indican otro token
                     inicio_numero = columna
-                    while columna < len(linea) and columna < inicio_numero + 1 and es_token(linea[columna]):  # Detectar todo el identificador
+                    while columna < len(linea) and es_token(linea[columna]):  # Detectar todo el identificador
                         columna += 1  
                     for token, value in tokens.items():
                         if linea[inicio_numero-1:columna] == value:  # Si el token coincide
@@ -107,9 +111,19 @@ def analizar_lexico(codigo, salida):
                                     i += 1
                                     break                 
 
-                #Validacion de Cadena
-                if es_cadena(char):  # Si estamos dentro de una cadena de texto
-                    while columna < len(linea) and not es_cadena(linea[columna]):
+                #Validacion de Cadena Simple
+                if es_cadena_simple(char):  # Si estamos dentro de una cadena de texto
+                    while columna < len(linea) and not es_cadena_simple(linea[columna]):
+                        palabra += linea[columna]
+                        columna += 1  
+                    output_file.write(f"<tkn_cadena,\'{palabra}\',{fila},{(columna - len(palabra))}>\n")  # Escribe el token de cadena
+                    columna += 1
+                    palabra = ''  # Resetea la palabra
+                    continue  # Continúa al siguiente carácter
+
+                #Validacion de Cadena Doble
+                if es_cadena_doble(char):  # Si estamos dentro de una cadena de texto
+                    while columna < len(linea) and not es_cadena_doble(linea[columna]):
                         palabra += linea[columna]
                         columna += 1  
                     output_file.write(f"<tkn_cadena,\"{palabra}\",{fila},{(columna - len(palabra))}>\n")  # Escribe el token de cadena

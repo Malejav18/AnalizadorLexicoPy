@@ -49,7 +49,13 @@ tokens = {
     'tk_hat': '^', 
     'tk_left_shift' : '<<', 
     'tk_right_shift' : '<<',
-    'tk_colon_asig' : ':='
+    'tk_colon_asig' : ':=',
+    'tk_left_shift_asig' : '<<=',
+    'tk_right_shift_asig' : '>>=',
+    'tk_pot_asig' : '**=',
+    'tk_div_entera_asig' : '//=',
+    'tk_three_points' : '...'
+
 
 }
 
