@@ -1,4 +1,1 @@
-Despues de object, detectnoise no detecta más Causa: No detecta ):
-Sustituir funciones nativas por creadas manualmente
-Estilizar código
 Leer también por consola

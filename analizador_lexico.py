@@ -32,6 +32,11 @@ def es_cadena(char):
         return True
     return False
 
+def es_palabra_reservada(palabra):
+    if palabra in palabras_reservadas:
+        return True
+    return False
+
 def analizar_lexico(codigo):
     fila = 0  # Contador de filas (líneas de código)
     columna = 0  # Contador de columnas (posición en la línea)
@@ -81,43 +86,42 @@ def analizar_lexico(codigo):
             
             #Validacion de Token
             if es_token(char):  # Si el carácter es un token válido
+                check = False #Bandera para revisar si los dos tokens en conjunto indican otro token
                 inicio_numero = columna
                 while columna < len(linea) and columna < inicio_numero + 1 and es_token(linea[columna]):  # Detectar todo el identificador
                     columna += 1  
-                for token, value in tokens.items(): 
-                    if linea[inicio_numero-1:columna] == value:  # Si el token coincide
+                for token, value in tokens.items():
+                    if linea[inicio_numero-1:columna]== value:  # Si el token coincide
+                        check = True
                         print(f"<{token}, {fila}, {columna-len(value)+1}>")  # Imprime el token
                         break
-                    else:
-                        print("Entrando")
-                        if linea[inicio_numero-1:columna-1] == value:  # Si el token coincide
-                            print(f"<{token}, {fila}, {columna-len(value)+1}>")  # Imprime el token
-                        if linea[inicio_numero:columna] == value:  # Si el token coincide
-                            print(f"<{token}, {fila}, {columna-len(value)+1}>")  # Imprime el token
-                        break                        
+                if not check: #Si el token no coincide, se evalúan individualmente
+                    i=0
+                    for token, value in tokens.items():
+                        for char in linea[inicio_numero-1:columna]: 
+                            if char == value:
+                              print(f"<{token}, {fila}, {columna-len(value)+i}>")  # Imprime el token
+                              i+=1
+                              break                 
 
             #Validacion de Cadena
             if es_cadena(char):  # Si estamos dentro de una cadena de texto
-                palabra += char  # Agrega el carácter actual a la palabra en análisis
                 while columna < len(linea) and not es_cadena(linea[columna]):
                     palabra += linea[columna]
-                    columna += 1
-                if linea[columna] == '"' or linea[columna] == "'":  # Si se encuentra el cierre de la cadena
-                    palabra += linea[columna]
-                    columna += 1
-                print(f"<tkn_cadena,{palabra},{fila},{(columna-len(palabra))+1}>")  # Imprime el token de cadena
+                    columna += 1  
+                print(f"<tkn_cadena,\"{palabra}\",{fila},{(columna-len(palabra))}>")  # Imprime el token de cadena
+                columna+=1
                 palabra = ''  # Resetea la palabra
                 continue  # Continúa al siguiente carácter
 
             
-
-            if char not in tokens.values() and char not in palabras_reservadas and not char.isalnum() and char != '_' and char!=' ' and char!='"':
-                print(f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})") # Reporta error léxico
+            # Error Léxico por Caracter
+            if not es_token(char) and not es_palabra_reservada(char) and not (('a' <= char <= 'z') or ('A' <= char <= 'Z') or ('0' <= char <= '9')) and char != '_' and char !=' ' and char !='"':
+                print(f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})")
                 return  # Finaliza la ejecución
-                continue
 
-
-            if char.isspace() or char in tokens.values():  # Si el carácter es un espacio o un token
+            #Error Léxico por palabra desconocida
+            if char == " " or char in tokens.values():  # Si el carácter es un espacio o un token
                 if palabra:
                     if palabra in palabras_reservadas: # Si la palabra es una palabra reservada
                         print(f"<{palabra}, {fila}, {columna - len(palabra)}>")
@@ -130,17 +134,15 @@ def analizar_lexico(codigo):
                             f"<id, {palabra},{fila},{columna - len(palabra)}>")
                     else:
                         try:
-                            # Intentamos convertir la palabra en un número entero
+                            # Intentar convertir en entero
                             numero_entero = int(palabra)
                             print(f"<numero_entero,{palabra},{fila},{columna - len(palabra)}>")
                         except ValueError:
-                            print(
-                                f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})")
-                            return
-                    palabra = ''
-
-
-            else:
+                            print(f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})")
+                            return #Finaliza la ejecucion
+                    palabra = ''  # Resetea la palabra
+           
+            else: # Ir guardando la palabra desconocida
                 palabra += char
 
 with open('codigo.py', 'r', encoding='utf-8') as file:  # Abre el archivo de código fuente
