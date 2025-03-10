@@ -1,0 +1,5 @@
+tkn ejecuta : -> Solamente, imprimiendo tk_resta (Coger la subcadena más larga ej. != distinto, no exclamación y distinto
+Skip empty lines, not +fila
+while3 completo, no while y 3
+Sustituir funciones nativas por creadas manualmente
+

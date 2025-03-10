@@ -16,6 +16,8 @@ def analizar_lexico(codigo):
     palabra = ''  # Variable para almacenar la palabra actual en análisis
     comentario = False  # Bandera para ignorar caracteres dentro de comentarios
     dentro_cadena = False  # Bandera para manejar cadenas de texto
+    dentro_funcion = False  # Bandera para detectar si estamos dentro de una función
+
 
     lineas = codigo.split('\n')  # Divide el código en líneas
     
@@ -36,7 +38,7 @@ def analizar_lexico(codigo):
             if dentro_cadena:  # Si estamos dentro de una cadena de texto
                 palabra += char  # Agrega el carácter actual a la palabra en análisis
                 if char == '"' or char == "'":  # Si se encuentra el cierre de la cadena
-                    print(f"<tkn_cadena, {palabra}, {fila}, {(columna-len(palabra))+1}>")  # Imprime el token de cadena
+                    print(f"<tkn_cadena,{palabra},{fila},{(columna-len(palabra))+1}>")  # Imprime el token de cadena
                     palabra = ''  # Resetea la palabra
                     dentro_cadena = False  # Sale del modo cadena
                 continue  # Continúa al siguiente carácter
@@ -46,7 +48,7 @@ def analizar_lexico(codigo):
                 continue  # Ignora el resto de la línea
 
             if char not in tokens.values() and char not in palabras_reservadas and not char.isalnum() and char != '_' and char!=' ' and char!='"':
-                print(f">>>Error léxico: Símbolo no definido '{char}' en la fila {fila}, columna {columna}")  # Reporta error léxico
+                print(f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})") # Reporta error léxico
                 return  # Finaliza la ejecución
                 continue
 
@@ -54,7 +56,7 @@ def analizar_lexico(codigo):
                 inicio_numero = columna - 1  # Guarda la posición inicial del número
                 while columna < len(linea) and (linea[columna].isdigit()):  # Mientras sea un número
                     columna += 1  # Avanza la columna
-                print(f"<tk_entero, {linea[inicio_numero:columna]}, {fila}, {inicio_numero + 1}>")  # Imprime el token numérico
+                print(f"<tk_entero,{linea[inicio_numero:columna]},{fila},{inicio_numero + 1}>")  # Imprime el token numérico
                 palabra = ''  # Resetea la palabra
                 continue  # Pasa al siguiente carácter
 
@@ -64,11 +66,11 @@ def analizar_lexico(codigo):
                     columna += 1  # Avanza la columna
                 
                 if linea[inicio_numero:columna] in palabras_reservadas:  # Si es una palabra reservada
-                    print(f"<{linea[inicio_numero:columna]}, {fila}, {inicio_numero + 1}>")  # Imprime el token de palabra reservada
+                    print(f"<{linea[inicio_numero:columna]},{fila},{inicio_numero + 1}>")  # Imprime el token de palabra reservada
                 elif linea[inicio_numero:columna] in tipos_datos:  # Si es un tipo de dato
-                    print(f"<tipo_dato, {linea[inicio_numero:columna]}, {fila}, {inicio_numero + 1}>")  # Imprime el token de tipo de dato
+                    print(f"<{linea[inicio_numero:columna]},{fila},{inicio_numero + 1}>")  # Imprime el token de tipo de dato
                 else:
-                    print(f"<id, {linea[inicio_numero:columna]}, {fila}, {inicio_numero + 1}>")  # Imprime el token de identificador
+                    print(f"<id,{linea[inicio_numero:columna]},{fila},{inicio_numero + 1}>")  # Imprime el token de identificador
                 continue  # Pasa al siguiente carácter
 
             
@@ -82,18 +84,18 @@ def analizar_lexico(codigo):
 
                     elif palabra in tipos_datos: # Si la palabra es un tipo de dato
                         print(
-                            f"<tipo_dato, {palabra}, {fila}, {columna - len(palabra)}>")
+                            f"<{palabra},{fila},{columna - len(palabra)}>")
                     elif es_identificador(palabra): # Si la palabra es un identificador
                         print(
-                            f"<id, {palabra}, {fila}, {columna - len(palabra)}>")
+                            f"<id, {palabra},{fila},{columna - len(palabra)}>")
                     else:
                         try:
                             # Intentamos convertir la palabra en un número entero
                             numero_entero = int(palabra)
-                            print(f"<numero_entero, {palabra}, {fila}, {columna - len(palabra)}>")
+                            print(f"<numero_entero,{palabra},{fila},{columna - len(palabra)}>")
                         except ValueError:
                             print(
-                                f">>>Error léxico(Fila:{fila},Columna:{columna - len(palabra)})")
+                                f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})")
                             return
                     palabra = ''
 
