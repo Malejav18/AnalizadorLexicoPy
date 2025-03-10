@@ -1,5 +1,4 @@
-tkn ejecuta : -> Solamente, imprimiendo tk_resta (Coger la subcadena más larga ej. != distinto, no exclamación y distinto
-Skip empty lines, not +fila
-while3 completo, no while y 3
+Despues de object, detectnoise no detecta más Causa: No detecta ):
 Sustituir funciones nativas por creadas manualmente
-
+Estilizar código
+Leer también por consola

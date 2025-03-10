@@ -1,81 +1,121 @@
 from tokens_palabras import tokens, palabras_reservadas, tipos_datos
 
+def es_tab(char):
+    if char == '\t':
+        return True
+    return False
+
+def es_comentario(char):
+    if char == "#":
+        return True
+
+def es_digito(char):
+    if ('0' <= char <= '9'):
+        return True
+    return False
+
 def es_identificador(cadena):
     if not cadena:
-        return False  # Retorna falso si la cadena está vacía
-    if cadena[0].isdigit():
-        return False  # Un identificador no puede empezar con un número
+        return False  # Cadena vacía
     for char in cadena:
-        if not char.isalnum() and char != '_':
-            return False  # Solo se permiten letras, números y guion bajo
-    return True  # Si pasa todas las validaciones, es un identificador válido
+        if not (('a' <= char <= 'z') or ('A' <= char <= 'Z') or ('0' <= char <= '9')) and char != '_':
+            return False  # Solo se permiten letras minusculas y mayusculas , números y guion bajo
+    return True
+
+def es_token(char):
+    if char in tokens.values():
+        return True
+    return False
+
+def es_cadena(char):
+    if char == '"' or char == "'":
+        return True
+    return False
 
 def analizar_lexico(codigo):
-    fila = 0  # Inicializa el contador de filas (líneas de código)
-    columna = 0  # Inicializa el contador de columnas (posición en la línea)
-    palabra = ''  # Variable para almacenar la palabra actual en análisis
-    comentario = False  # Bandera para ignorar caracteres dentro de comentarios
-    dentro_cadena = False  # Bandera para manejar cadenas de texto
-    dentro_funcion = False  # Bandera para detectar si estamos dentro de una función
-
+    fila = 0  # Contador de filas (líneas de código)
+    columna = 0  # Contador de columnas (posición en la línea)
+    palabra = ''  # Variable de almacenamiento de palabra actual
 
     lineas = codigo.split('\n')  # Divide el código en líneas
     
-    for linea in lineas:  # Itera sobre cada línea del código
-        fila += 1  # Incrementa el número de fila
-        columna = 0  # Reinicia el contador de columnas
-        comentario = False  # Reinicia la bandera de comentario en cada nueva línea
-        palabra = ''  # Reinicia la palabra analizada en cada nueva línea
+    for linea in lineas: 
+        # Reinicio de contadores y variables
+        fila += 1  
+        columna = 0  
+        palabra = ''  
+
         while columna < len(linea):
             char = linea[columna]
-            if char == '\t':
-                columna += 4 # Incrementa la columna en 4 espacios
+
+            #Validacion de Tabulacion
+            if es_tab(char):
+                columna += 4 # Tabulacion equivalente a 4 espacios
             else:
                 columna += 1
 
-            if comentario:  # Si ya estamos en un comentario, ignoramos el resto de la línea
+            # Validacion de comentario
+            if es_comentario(char):
+                break  # Ignorar el resto de la línea
+            
+            # Validacion de Digito
+            if es_digito(char):  
+                inicio_numero = columna  # Guarda la posición inicial del número
+                while columna < len(linea) and (es_digito(linea[columna])):  # Detectar todo el número
+                    columna += 1 
+                print(f"<tk_entero,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>")  # Imprime el token numérico
                 continue
-            if dentro_cadena:  # Si estamos dentro de una cadena de texto
+            
+            #Validacion de identificador
+            if es_identificador(char):
+                inicio_numero = columna  # Guarda la posición inicial del identificador
+                while columna < len(linea) and es_identificador(linea[columna]):  # Detectar todo el identificador
+                    columna += 1     
+                if linea[inicio_numero-1:columna] in palabras_reservadas:  # Imprimir palabra reservada
+                    print(f"<{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>")
+                elif linea[inicio_numero-1:columna] in tipos_datos:  # Imprimir tipo de dato
+                    print(f"<{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>")
+                else:
+                    print(f"<id,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>")  # Imprime el token de identificador
+                continue 
+            
+            #Validacion de Token
+            if es_token(char):  # Si el carácter es un token válido
+                inicio_numero = columna
+                while columna < len(linea) and columna < inicio_numero + 1 and es_token(linea[columna]):  # Detectar todo el identificador
+                    columna += 1  
+                for token, value in tokens.items(): 
+                    if linea[inicio_numero-1:columna] == value:  # Si el token coincide
+                        print(f"<{token}, {fila}, {columna-len(value)+1}>")  # Imprime el token
+                        break
+                    else:
+                        print("Entrando")
+                        if linea[inicio_numero-1:columna-1] == value:  # Si el token coincide
+                            print(f"<{token}, {fila}, {columna-len(value)+1}>")  # Imprime el token
+                        if linea[inicio_numero:columna] == value:  # Si el token coincide
+                            print(f"<{token}, {fila}, {columna-len(value)+1}>")  # Imprime el token
+                        break                        
+
+            #Validacion de Cadena
+            if es_cadena(char):  # Si estamos dentro de una cadena de texto
                 palabra += char  # Agrega el carácter actual a la palabra en análisis
-                if char == '"' or char == "'":  # Si se encuentra el cierre de la cadena
-                    print(f"<tkn_cadena,{palabra},{fila},{(columna-len(palabra))+1}>")  # Imprime el token de cadena
-                    palabra = ''  # Resetea la palabra
-                    dentro_cadena = False  # Sale del modo cadena
+                while columna < len(linea) and not es_cadena(linea[columna]):
+                    palabra += linea[columna]
+                    columna += 1
+                if linea[columna] == '"' or linea[columna] == "'":  # Si se encuentra el cierre de la cadena
+                    palabra += linea[columna]
+                    columna += 1
+                print(f"<tkn_cadena,{palabra},{fila},{(columna-len(palabra))+1}>")  # Imprime el token de cadena
+                palabra = ''  # Resetea la palabra
                 continue  # Continúa al siguiente carácter
 
-            if char == '#':  # Detecta el inicio de un comentario en línea
-                comentario = True  # Activa la bandera de comentario
-                continue  # Ignora el resto de la línea
+            
 
             if char not in tokens.values() and char not in palabras_reservadas and not char.isalnum() and char != '_' and char!=' ' and char!='"':
                 print(f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})") # Reporta error léxico
                 return  # Finaliza la ejecución
                 continue
 
-            if char.isdigit():  # Si el carácter es un número
-                inicio_numero = columna - 1  # Guarda la posición inicial del número
-                while columna < len(linea) and (linea[columna].isdigit()):  # Mientras sea un número
-                    columna += 1  # Avanza la columna
-                print(f"<tk_entero,{linea[inicio_numero:columna]},{fila},{inicio_numero + 1}>")  # Imprime el token numérico
-                palabra = ''  # Resetea la palabra
-                continue  # Pasa al siguiente carácter
-
-            if es_identificador(char):  # Si el carácter es el inicio de un identificador
-                inicio_numero = columna - 1  # Guarda la posición inicial del identificador
-                while columna < len(linea) and es_identificador(linea[columna]):  # Mientras sea parte del identificador
-                    columna += 1  # Avanza la columna
-                
-                if linea[inicio_numero:columna] in palabras_reservadas:  # Si es una palabra reservada
-                    print(f"<{linea[inicio_numero:columna]},{fila},{inicio_numero + 1}>")  # Imprime el token de palabra reservada
-                elif linea[inicio_numero:columna] in tipos_datos:  # Si es un tipo de dato
-                    print(f"<{linea[inicio_numero:columna]},{fila},{inicio_numero + 1}>")  # Imprime el token de tipo de dato
-                else:
-                    print(f"<id,{linea[inicio_numero:columna]},{fila},{inicio_numero + 1}>")  # Imprime el token de identificador
-                continue  # Pasa al siguiente carácter
-
-            
-                
-                
 
             if char.isspace() or char in tokens.values():  # Si el carácter es un espacio o un token
                 if palabra:
@@ -99,16 +139,6 @@ def analizar_lexico(codigo):
                             return
                     palabra = ''
 
-                if char in tokens.values():  # Si el carácter es un token válido
-                    for token, value in tokens.items():  # Recorre los tokens definidos
-                        if columna >= len(value) and linea[columna-len(value):columna] == value:  # Si el token coincide
-                            print(f"<{token}, {fila}, {columna-len(value)+1}>")  # Imprime el token
-                            palabra = ''  # Resetea la palabra
-                            break  # Sale del bucle de tokens
-
-            elif char == '"' or char == "'":
-                palabra += char
-                dentro_cadena = True
 
             else:
                 palabra += char
