@@ -6,6 +6,11 @@ def es_tab(char):
         return True
     return False
 
+def es_espacio(char):
+    if char == ' ':
+        return True
+    return False
+
 def es_comentario(char):
     if char == "#":
         return True
@@ -28,14 +33,11 @@ def es_token(char):
         return True
     return False
 
-def es_cadena_simple(char):
-    if char == "'":
+def es_cadena(char):
+    if char == "'" or char == '"':
         return True
     return False
-def es_cadena_doble(char):
-    if char == '"':
-        return True
-    return False
+
 
 def es_palabra_reservada(palabra):
     if palabra in palabras_reservadas:
@@ -63,6 +65,8 @@ def analizar_lexico(codigo, salida):
                 #Validacion de Tabulacion
                 if es_tab(char):
                     columna += 4 # Tabulacion equivalente a 4 espacios
+                if es_espacio(char):
+                    columna += 1
                 else:
                     columna += 1
 
@@ -74,7 +78,10 @@ def analizar_lexico(codigo, salida):
                 if es_digito(char):  
                     inicio_numero = columna  # Guarda la posición inicial del número
                     while columna < len(linea) and (es_digito(linea[columna])):  # Detectar todo el número
-                        columna += 1 
+                        columna += 1
+                    if (columna+1) < len(linea) and (('a' <= linea[columna+1] <= 'z') or ('A' <= linea[columna+1] <= 'Z') or (linea[columna + 1] == '_')): #Un identificador no puede comenzar con un número
+                        output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna})\n")
+                        return  # Finaliza la ejecución
                     output_file.write(f"<tk_entero,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")  # Escribe el token numérico en el archivo
                     continue
                 
@@ -89,7 +96,8 @@ def analizar_lexico(codigo, salida):
                         output_file.write(f"<{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")
                     else:
                         output_file.write(f"<id,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")  # Imprime el token de identificador
-                    continue 
+                    continue
+
                 
                 #Validacion de Token
                 if es_token(char):  # Si el carácter es un token válido
@@ -111,25 +119,20 @@ def analizar_lexico(codigo, salida):
                                     i += 1
                                     break                 
 
-                #Validacion de Cadena Simple
-                if es_cadena_simple(char):  # Si estamos dentro de una cadena de texto
-                    while columna < len(linea) and not es_cadena_simple(linea[columna]):
+                #Validacion de Cadena
+                if es_cadena(char):  # Si dentro de una cadena de texto
+                    comillas = char
+                    while columna < len(linea) and not es_cadena(linea[columna]):
                         palabra += linea[columna]
                         columna += 1  
-                    output_file.write(f"<tkn_cadena,\'{palabra}\',{fila},{(columna - len(palabra))}>\n")  # Escribe el token de cadena
-                    columna += 1
-                    palabra = ''  # Resetea la palabra
-                    continue  # Continúa al siguiente carácter
-
-                #Validacion de Cadena Doble
-                if es_cadena_doble(char):  # Si estamos dentro de una cadena de texto
-                    while columna < len(linea) and not es_cadena_doble(linea[columna]):
-                        palabra += linea[columna]
-                        columna += 1  
+                    if columna >= len(linea): # Comillas sin cerrar
+                        output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna})\n")
+                        return  # Finaliza la ejecución
                     output_file.write(f"<tkn_cadena,\"{palabra}\",{fila},{(columna - len(palabra))}>\n")  # Escribe el token de cadena
                     columna += 1
                     palabra = ''  # Resetea la palabra
                     continue  # Continúa al siguiente carácter
+
 
                 # Error Léxico por Caracter
                 if not es_token(char) and not es_palabra_reservada(char) and not (('a' <= char <= 'z') or ('A' <= char <= 'Z') or ('0' <= char <= '9')) and char != '_' and char !=' ' and char !='"':
@@ -171,7 +174,7 @@ else:
 
         analizar_lexico(input_text, salida) 
 
-        print(f"Análisis léxico completado. Resultados guardados en '{salida}'.")
+        #print(f"Análisis léxico completado. Resultados guardados en '{salida}'.")
 
     except FileNotFoundError:
         print(f"Error: El archivo '{archivo_entrada}' no se encontró.")
