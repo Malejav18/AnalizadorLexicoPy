@@ -65,8 +65,10 @@ def analizar_lexico(codigo, salida):
                 #Validacion de Tabulacion
                 if es_tab(char):
                     columna += 4 # Tabulacion equivalente a 4 espacios
+                    continue
                 if es_espacio(char):
                     columna += 1
+                    continue
                 else:
                     columna += 1
 
@@ -79,9 +81,6 @@ def analizar_lexico(codigo, salida):
                     inicio_numero = columna  # Guarda la posición inicial del número
                     while columna < len(linea) and (es_digito(linea[columna])):  # Detectar todo el número
                         columna += 1
-                    if (columna+1) < len(linea) and (('a' <= linea[columna+1] <= 'z') or ('A' <= linea[columna+1] <= 'Z') or (linea[columna + 1] == '_')): #Un identificador no puede comenzar con un número
-                        output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna})\n")
-                        return  # Finaliza la ejecución
                     output_file.write(f"<tk_entero,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")  # Escribe el token numérico en el archivo
                     continue
                 
