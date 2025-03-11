@@ -1,3 +1,0 @@
-Sintaxis de Importación from import * -> *Palabras reservadas de librerías
-*Debería reconocer comentario líneas múltiples
-Reconocer entero e id seguidos o Error Léxico
