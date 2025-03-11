@@ -1,83 +1,79 @@
-# Definir los tokens y palabras reservadas
-# Cada token tiene asociado su representación en el lenguaje.
-tokens = {
-    'tk_ejecuta': '->', 
-    'tk_potencia': '**', 
-    'tk_mayor_igual': '>=', 
-    'tk_menor_igual': '<=', 
-    'tk_igual': '==', 
-    'tk_distinto': '!=', 
-    'tk_mas_asig': '+=', 
-    'tk_menos_asig': '-=', 
-    'tk_mult_asig': '*=', 
-    'tk_div_asig': '/=', 
-    'tk_div_entera': '//',
-    'tk_mod_asig': '%=', 
-    'tk_amper_asig': '&=', 
-    'tk_bar_asig': '|=', 
-    'tk_hat_asig': '^=', 
-    'tk_menor_menor': '<<',
-    'tk_mayor_mayor': '>>',
-    'tk_punto_y_coma': ';', 
-    'tk_coma': ',', 
-    'tk_par_izq': '(', 
-    'tk_par_der': ')', 
-    'tk_corchete_izq': '[', 
-    'tk_corchete_der': ']', 
-    'tk_llave_izq': '{', 
-    'tk_llave_der': '}', 
-    'tk_dos_puntos': ':', 
-    'tk_barra' : '|', 
-    'tk_punto': '.', 
-    'tk_asig': '=', 
-    'tk_div': '/', 
-    'tk_suma': '+', 
-    'tk_resta': '-', 
-    'tk_mult': '*', 
-    'tk_modulo': '%', 
-    'tk_mayor': '>', 
-    'tk_menor': '<', 
-    'tk_arroba': '@',
-    'tk_arroba_asig': '@=',
-    'tk_comentario': '#', 
-    'tk_amper': '&', 
-    'tk_interrogacion': '?', 
-    'tk_tilde': '~', 
-    'tk_barra_piso': '_', 
-    'tk_exclamacion': '!', 
-    'tk_comentario_multilinea': "'''", 
-    'tk_hat': '^', 
-    'tk_left_shift' : '<<', 
-    'tk_right_shift' : '<<',
-    'tk_colon_asig' : ':=',
-    'tk_left_shift_asig' : '<<=',
-    'tk_right_shift_asig' : '>>=',
-    'tk_pot_asig' : '**=',
-    'tk_div_entera_asig' : '//=',
-    'tk_three_points' : '...'
+# Diccionario de librerías y sus palabras reservadas
+palabras_reservadas_librerias = {
+    # Módulo math
+    'math': {'pi', 'e', 'tau', 'inf', 'nan', 'sqrt', 'ceil', 'floor', 'trunc', 'pow', 'exp', 'log', 
+             'log10', 'log2', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'degrees', 
+             'radians', 'hypot', 'factorial', 'gcd', 'lcm', 'isfinite', 'isinf', 'isnan'},
 
+    # Módulo os
+    'os': {'path', 'getenv', 'chdir', 'getcwd', 'listdir', 'mkdir', 'remove', 'rename', 'rmdir', 
+           'system', 'environ'},
 
-}
+    # Módulo sys
+    'sys': {'exit', 'argv', 'path', 'stdin', 'stdout', 'stderr', 'platform'},
 
+    # Módulo datetime
+    'datetime': {'datetime', 'date', 'time', 'timedelta', 'timezone', 'now', 'today', 'utcnow', 
+                 'strftime', 'strptime'},
 
-# Palabras reservadas en minúsculas
-# Estas palabras tienen un significado especial en la sintaxis del lenguaje y no pueden usarse como identificadores
-palabras_reservadas = {
-    'range', 'object', 'False', 'None', 'True', 'and', 'as', 'assert', 'async', 'await', 'break',
-    'class', 'continue', 'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global',
-    'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 'print', 'raise', 'return',
-    'try', 'self', 'while', 'with', 'yield', '__init__'
-}
+    # Módulo random
+    'random': {'randint', 'uniform', 'choice', 'choices', 'sample', 'shuffle', 'seed'},
 
-# Tipos de datos básicos del lenguaje
-# Cada tipo de dato se asocia con su palabra clave en el lenguaje
-tipos_datos = {
-    'int': 'int',
-    'float': 'float',
-    'str': 'str',
-    'bool': 'bool',
-    'list': 'list',
-    'tuple': 'tuple',
-    'dict': 'dict',
-    'set': 'set'
+    # Módulo re (Expresiones Regulares)
+    're': {'match', 'search', 'findall', 'sub', 'split', 'compile'},
+
+    # Librería numpy
+    'numpy': {'array', 'linspace', 'arange', 'zeros', 'ones', 'eye', 'dot', 'matmul', 'mean', 'median', 
+              'std', 'var', 'min', 'max', 'sum', 'prod', 'shape', 'dtype', 'reshape', 'transpose', 
+              'flatten', 'squeeze'},
+
+    # Librería pandas
+    'pandas': {'DataFrame', 'Series', 'read_csv', 'read_excel', 'to_csv', 'to_excel', 'loc', 'iloc', 
+               'head', 'tail', 'merge', 'concat', 'groupby', 'pivot', 'apply', 'map', 'unique', 
+               'value_counts', 'fillna', 'dropna', 'drop', 'rename'},
+
+    # Librería matplotlib.pyplot
+    'matplotlib.pyplot': {'plot', 'scatter', 'bar', 'hist', 'boxplot', 'xlabel', 'ylabel', 'title', 
+                          'legend', 'grid', 'show', 'savefig'},
+
+    # Librería sklearn
+    'sklearn': {'fit', 'predict', 'transform', 'score', 'train_test_split', 'cross_val_score', 
+                'accuracy_score', 'confusion_matrix', 'classification_report'},
+
+    # Flask
+    'flask': {'Flask', 'request', 'jsonify', 'render_template', 'session', 'redirect', 'url_for'},
+
+    # Django
+    'django': {'models', 'CharField', 'IntegerField', 'ForeignKey', 'ManyToManyField', 'views', 
+               'forms', 'admin', 'urls', 'QuerySet', 'filter', 'get', 'all', 'save', 'delete'},
+
+    # FastAPI
+    'fastapi': {'FastAPI', 'APIRouter', 'HTTPException', 'Request', 'Response', 'Depends'},
+
+    # SQL (usado en sqlite3, MySQL, etc.)
+    'sql': {'SELECT', 'FROM', 'WHERE', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'GROUP', 'ORDER', 
+            'LIMIT', 'OFFSET', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 
+            'TABLE', 'DROP', 'ALTER', 'PRIMARY', 'FOREIGN', 'KEY', 'AUTO_INCREMENT', 'INDEX'},
+
+    # MongoDB (pymongo)
+    'pymongo': {'find', 'insert_one', 'insert_many', 'update_one', 'update_many', 'delete_one', 
+                'delete_many', 'aggregate', 'sort', 'limit'},
+
+    # asyncio
+    'asyncio': {'async', 'await', 'create_task', 'run', 'sleep', 'gather', 'Event', 'Queue'},
+
+    # Manejo de archivos (open)
+    'file': {'read', 'readline', 'readlines', 'write', 'writelines', 'close', 'seek', 'tell', 'flush'},
+
+    # JSON
+    'json': {'load', 'loads', 'dump', 'dumps'},
+
+    # XML
+    'xml': {'parse', 'fromstring', 'find', 'findall', 'get', 'set', 'write'},
+
+    # Requests (para peticiones HTTP)
+    'requests': {'get', 'post', 'put', 'delete', 'json', 'headers', 'status_code', 'text'},
+
+    # Sockets
+    'socket': {'socket', 'bind', 'listen', 'accept', 'connect', 'send', 'recv', 'close'},
 }
