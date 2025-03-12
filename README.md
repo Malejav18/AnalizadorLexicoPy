@@ -5,7 +5,7 @@ Integrantes:
 - Eduardo Hincapie 
 - Josh Lopez 
 - Miguel Suarez 
-- Alejandra Vargas
+- Maria Alejandra Vargas
 
 El objetivo para este proyecto es tomar un código fuente escrito en python y realizar un
 análisis léxico sobre dicho código. 
