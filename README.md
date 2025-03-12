@@ -19,7 +19,7 @@ txt con el análisis léxico del mismo como salida.
 
 - **Python** (versión 3 o superior)
 
-## Modo de Uso:
+## 👾 Modo de Uso:
 1. Descarga los archivos adjuntos.
 2. Escribe tu código dentro de "codigo.py", o usa el código de ejemplo.
 3. Ejecuta el siguiente comando:
