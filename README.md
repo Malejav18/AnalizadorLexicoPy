@@ -8,17 +8,29 @@ Integrantes:
 - Alejandra Vargas
 
 El objetivo para este proyecto es tomar un código fuente escrito en python y realizar un
-análisis léxico sobre dicho código. Debe implementar un programa en Python que reciba un
-archivo como entrada y devuelva un archivo como salida.
+análisis léxico sobre dicho código. 
+
+Se implementa un programa en Python que recibe un archivo py como entrada y devuelve un archivo 
+txt con el análisis léxico del mismo como salida.
+
+## 🧷 Requerimientos
+
+### Dependencias necesarias
+
+- **Python** (versión 3 o superior)
 
 ## Modo de Uso:
 1. Descarga los archivos adjuntos.
-2. Escribe tu código dentro de codigo.py, o usa el código de ejemplo.
+2. Escribe tu código dentro de "codigo.py", o usa el código de ejemplo.
 3. Ejecuta el siguiente comando:
+
 ```
 python3 analizador.py codigo.py
 ```
+
 Los resultados del analizador léxico se guardan en el archivo de salida "resultado_lexico.txt"
+
+Como ejemplo prueba tenemos:
 
 Codigo.py
 ```
