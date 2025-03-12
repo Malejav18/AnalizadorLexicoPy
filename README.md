@@ -1,4 +1,4 @@
-# Analizador Léxico en Python
+# 🗂️ Analizador Léxico en Python
 
 Integrantes:
 
