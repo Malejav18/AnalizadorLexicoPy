@@ -130,19 +130,18 @@ def es_comentario_multilinea(linea, columna):
     return linea[columna:columna+3] == "'''" or linea[columna:columna+3] == '"""'
 
 def importar_palabras_reservadas(linea):
-    if linea.startswith("from ") and " import" in linea:
+    if "import" in linea:
         partes = linea.split()
-        if len(partes) >= 4:
-            libreria = partes[1]
-            if libreria in palabras_reservadas_librerias:
-                palabras_reservadas.update(palabras_reservadas_librerias[libreria])
-                palabras_reservadas.add(libreria)
+        libreria = partes[1]
+        if libreria in palabras_reservadas_librerias:
+            palabras_reservadas.update(palabras_reservadas_librerias[libreria])
+            palabras_reservadas.add(libreria)
 
 def analizador_lexico(codigo, salida):
     fila = 0  # Contador de filas (líneas de código)
     columna = 0  # Contador de columnas (posición en la línea)
     palabra = ''  # Variable de almacenamiento de palabra actual
-    comentario_multilinea = False # Bandera para indicar si se está en un comentario multilínea
+    dentro_de_comentario = False # Bandera para indicar si se está en un comentario multilínea
 
     lineas = codigo.split('\n')  # Divide el código en líneas
     
@@ -155,125 +154,131 @@ def analizador_lexico(codigo, salida):
             columna = 0  
             palabra = ''  
             
-
             while columna < len(linea):
                 char = linea[columna]
-                if not comentario_multilinea:
-                    #Validacion de Tabulacion
-                    if es_tab(char):
-                        columna += 4 # Tabulacion equivalente a 4 espacios
-                        continue
-                    if es_espacio(char):
+                if dentro_de_comentario:
+                    if es_comentario_multilinea(linea,columna):
+                        dentro_de_comentario = False 
+                    columna += 1
+                    continue 
+                if es_comentario_multilinea(linea,columna):
+                    dentro_de_comentario = True
+                    columna += 3
+                    continue
+                #Validacion de Tabulacion
+                if es_tab(char):
+                    columna += 4 # Tabulacion equivalente a 4 espacios
+                    continue
+                if es_espacio(char):
+                    columna += 1
+                    continue
+                else:
+                    columna += 1
+
+                # Validacion de comentario
+                if es_comentario(char):
+                    break  # Ignorar el resto de la línea
+                
+                # Validacion de Digito
+                if es_digito(char):  
+                    inicio_numero = columna  # Guarda la posición inicial del número
+                    while columna < len(linea) and (es_digito(linea[columna])):  # Detectar todo el número
                         columna += 1
-                        continue
+                    output_file.write(f"<tk_entero,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")  # Escribe el token numérico en el archivo
+                    continue
+
+                # Importar palabras reservadas de librerías
+                importar_palabras_reservadas(linea)
+
+                #Validacion de identificador
+                if es_identificador(char):
+                    inicio_numero = columna  # Guarda la posición inicial del identificador
+                    while columna < len(linea) and es_identificador(linea[columna]):  # Detectar todo el identificador
+                        columna += 1     
+                    if linea[inicio_numero-1:columna] in palabras_reservadas:  # Imprimir palabra reservada
+                        output_file.write(f"<{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")
+                    elif linea[inicio_numero-1:columna] in tipos_datos:  # Imprimir tipo de dato
+                        output_file.write(f"<{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")
                     else:
-                        columna += 1
+                        output_file.write(f"<id,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")  # Imprime el token de identificador
+                    continue
 
-                    # Validacion de comentario
-                    if es_comentario(char):
-                        break  # Ignorar el resto de la línea
-                    
-                    # Validacion de Digito
-                    if es_digito(char):  
-                        inicio_numero = columna  # Guarda la posición inicial del número
-                        while columna < len(linea) and (es_digito(linea[columna])):  # Detectar todo el número
-                            columna += 1
-                        output_file.write(f"<tk_entero,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")  # Escribe el token numérico en el archivo
-                        continue
-                    
-                    #Validacion de identificador
-                    if es_identificador(char):
-                        inicio_numero = columna  # Guarda la posición inicial del identificador
-                        while columna < len(linea) and es_identificador(linea[columna]):  # Detectar todo el identificador
-                            columna += 1     
-                        if linea[inicio_numero-1:columna] in palabras_reservadas:  # Imprimir palabra reservada
-                            output_file.write(f"<{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")
-                        elif linea[inicio_numero-1:columna] in tipos_datos:  # Imprimir tipo de dato
-                            output_file.write(f"<{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")
-                        else:
-                            output_file.write(f"<id,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")  # Imprime el token de identificador
-                        continue
-
-                    
-                    #Validacion de Token
-                    if es_token(char):  # Si el carácter es un token válido
-                        check = False #Bandera para revisar si los dos tokens en conjunto indican otro token
-                        inicio_numero = columna
-                        while columna < len(linea) and es_token(linea[columna]):  # Detectar todo el identificador
-                            columna += 1  
-                        for token, value in tokens.items():
-                            if linea[inicio_numero-1:columna] == value:  # Si el token coincide
-                                check = True
-                                output_file.write(f"<{token}, {fila}, {columna - len(value) + 1}>\n")  # Escribe el token en el archivo
-                                break
-                        if not check:  # Si el token no coincide, se evalúan individualmente
-                            i = 0
-                            for token, value in tokens.items():
-                                for char in linea[inicio_numero-1:columna]: 
-                                    if char == value:
-                                        output_file.write(f"<{token}, {fila}, {columna - len(value) + i}>\n")  # Escribe el token en el archivo
-                                        i += 1
-                                        break   
                 
-                    # Validacion de comentario multilínea
-                    if es_comentario_multilinea(linea, columna-1):
+                #Validacion de Token
+                if es_token(char):  # Si el carácter es un token válido
+                    check = False #Bandera para revisar si los dos tokens en conjunto indican otro token
+                    inicio_numero = columna
+                    while columna < len(linea) and es_token(linea[columna]):  # Detectar todo el identificador
+                        columna += 1  
+                    for token, value in tokens.items():
+                        if linea[inicio_numero-1:columna] == value:  # Si el token coincide
+                            check = True
+                            output_file.write(f"a<{token}, {fila}, {columna - len(value) + 1}>\n")  # Escribe el token en el archivo
+                            break
+                    if not check:  # Si el token no coincide, se evalúan individualmente
+                        i = 0
+                        for char in linea[inicio_numero-1:columna]: 
+                            #print(char)
+                            if char in tokens.values():
+                                keys = [key for key, val in tokens.items() if val == char]
+                                output_file.write(f"b<{keys[0]}, {fila}, {columna - len(value) + i}>\n")  # Escribe el token en el archivo
+                                #columna+=1  
+            
+                # Validacion de comentario multilínea
+                if '"""' in linea or "'''" in linea:
+                    partes = linea.split('"""') if '"""' in linea else linea.split("'''")
+                    if len(partes) > 2: 
+                        continue 
+                    else:
                         comentario_multilinea = True
-                        break
-                    
-                    #Validacion de Cadena
-                    if es_cadena(char):  # Si dentro de una cadena de texto
-                        while columna < len(linea) and not es_cadena(linea[columna]):
-                            palabra += linea[columna]
-                            columna += 1  
-                        if columna >= len(linea): # Comillas sin cerrar
-                            output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna})\n")
-                            return  # Finaliza la ejecución
-                        output_file.write(f"<tk_cadena,\"{palabra}\",{fila},{(columna - len(palabra))}>\n")  # Escribe el token de cadena
-                        columna += 1
-                        palabra = ''  # Resetea la palabra
-                        continue  # Continúa al siguiente carácter
-
-                    
-
-                    # Error Léxico por Caracter
-                    if not es_token(char) and not es_palabra_reservada(char) and not (('a' <= char <= 'z') or ('A' <= char <= 'Z') or ('0' <= char <= '9')) and char != '_' and char !=' ' and char !='"':
-                        output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})\n")
-                        return  # Finaliza la ejecución
-
-                    #Error Léxico por palabra desconocida
-                    if char == " " or char in tokens.values():  # Si el carácter es un espacio o un token
-                        if palabra:
-                            if palabra in palabras_reservadas: # Si la palabra es una palabra reservada
-                                output_file.write(f"<{palabra}, {fila}, {columna - len(palabra)}>\n")
-
-                            elif palabra in tipos_datos: # Si la palabra es un tipo de dato
-                                output_file.write(f"<{palabra},{fila},{columna - len(palabra)}>\n")
-                            elif es_identificador(palabra): # Si la palabra es un identificador
-                                output_file.write(f"<id, {palabra},{fila},{columna - len(palabra)}>\n")
-                            else:
-                                try:
-                                    # Intentar convertir en entero
-                                    numero_entero = int(palabra)
-                                    output_file.write(f"<numero_entero,{palabra},{fila},{columna - len(palabra)}>\n")
-                                except ValueError:
-                                    output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})\n")
-                                    return # Finaliza la ejecución
-                            palabra = ''  # Resetea la palabra
-
-                    
+                        continue
                 
-                    else:  # Ir guardando la palabra desconocida
+                #Validacion de Cadena
+                if es_cadena(char):  # Si dentro de una cadena de texto
+                    while columna < len(linea) and not es_cadena(linea[columna]):
+                        palabra += linea[columna]
+                        columna += 1  
+                    if columna >= len(linea): # Comillas sin cerrar
+                        output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna})\n")
+                        return  # Finaliza la ejecución
+                    output_file.write(f"<tk_cadena,\"{palabra}\",{fila},{(columna - len(palabra))}>\n")  # Escribe el token de cadena
+                    columna += 1
+                    palabra = ''  # Resetea la palabra
+                    continue  # Continúa al siguiente carácter
+
+                
+
+                # Error Léxico por Caracter
+                if not es_token(char) and not es_palabra_reservada(char) and not (('a' <= char <= 'z') or ('A' <= char <= 'Z') or ('0' <= char <= '9')) and char != '_' and char !=' ' and char !='"':
+                    output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})\n")
+                    return  # Finaliza la ejecución
+
+                #Error Léxico por palabra desconocida
+                if char == " " or char in tokens.values():  # Si el carácter es un espacio o un token
+                    if palabra:
+                        if palabra in palabras_reservadas: # Si la palabra es una palabra reservada
+                            output_file.write(f"<{palabra}, {fila}, {columna - len(palabra)}>\n")
+
+                        elif palabra in tipos_datos: # Si la palabra es un tipo de dato
+                            output_file.write(f"<{palabra},{fila},{columna - len(palabra)}>\n")
+                        elif es_identificador(palabra): # Si la palabra es un identificador
+                            output_file.write(f"<id, {palabra},{fila},{columna - len(palabra)}>\n")
+                        else:
+                            try:
+                                # Intentar convertir en entero
+                                numero_entero = int(palabra)
+                                output_file.write(f"<numero_entero,{palabra},{fila},{columna - len(palabra)}>\n")
+                            except ValueError:
+                                output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna - len(palabra)})\n")
+                                return # Finaliza la ejecución
+                        palabra = ''  # Resetea la palabra
+
+                
+            
+                else:  # Ir guardando la palabra desconocida
                         palabra += char
 
-                    # Importar palabras reservadas de librerías
-                    importar_palabras_reservadas(linea)
 
-                else: #Saltar todas las líneas dentro del comentario multilínea
-                    if not es_comentario_multilinea(linea, columna):
-                        break
-                    else:
-                        comentario_multilinea = False
-                        break
 
                
 
