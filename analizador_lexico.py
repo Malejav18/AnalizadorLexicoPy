@@ -228,7 +228,7 @@ def analizador_lexico(codigo, salida):
                         if columna >= len(linea): # Comillas sin cerrar
                             output_file.write(f">>> Error léxico(linea:{fila},posicion:{columna})\n")
                             return  # Finaliza la ejecución
-                        output_file.write(f"<tkn_cadena,\"{palabra}\",{fila},{(columna - len(palabra))}>\n")  # Escribe el token de cadena
+                        output_file.write(f"<tk_cadena,\"{palabra}\",{fila},{(columna - len(palabra))}>\n")  # Escribe el token de cadena
                         columna += 1
                         palabra = ''  # Resetea la palabra
                         continue  # Continúa al siguiente carácter
