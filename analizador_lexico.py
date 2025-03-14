@@ -129,13 +129,6 @@ def es_palabra_reservada(palabra):
 def es_comentario_multilinea(linea, columna):
     return linea[columna:columna+3] == "'''" or linea[columna:columna+3] == '"""'
 
-def importar_palabras_reservadas(linea):
-    if "import" in linea:
-        partes = linea.split()
-        libreria = partes[1]
-        if libreria in palabras_reservadas_librerias:
-            palabras_reservadas.update(palabras_reservadas_librerias[libreria])
-            palabras_reservadas.add(libreria)
 
 def analizador_lexico(codigo, salida):
     fila = 0  # Contador de filas (líneas de código)
@@ -189,9 +182,6 @@ def analizador_lexico(codigo, salida):
                     output_file.write(f"<tk_entero,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")  # Escribe el token numérico en el archivo
                     continue
 
-                # Importar palabras reservadas de librerías
-                importar_palabras_reservadas(linea)
-
                 #Validacion de identificador
                 if es_identificador(char):
                     inicio_numero = columna  # Guarda la posición inicial del identificador
@@ -201,6 +191,8 @@ def analizador_lexico(codigo, salida):
                         output_file.write(f"<{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")
                     elif linea[inicio_numero-1:columna] in tipos_datos:  # Imprimir tipo de dato
                         output_file.write(f"<{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")
+                    elif linea[inicio_numero-1:columna] in palabras_reservadas_librerias:  # Imprimir tipo de dato
+                        output_file.write(f"<tk_lib,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")
                     else:
                         output_file.write(f"<id,{linea[inicio_numero-1:columna]},{fila},{inicio_numero}>\n")  # Imprime el token de identificador
                     continue
