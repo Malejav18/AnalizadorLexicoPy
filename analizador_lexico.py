@@ -213,7 +213,7 @@ def analizador_lexico(codigo, salida):
                     for token, value in tokens.items():
                         if linea[inicio_numero-1:columna] == value:  # Si el token coincide
                             check = True
-                            output_file.write(f"a<{token}, {fila}, {columna - len(value) + 1}>\n")  # Escribe el token en el archivo
+                            output_file.write(f"<{token}, {fila}, {columna - len(value) + 1}>\n")  # Escribe el token en el archivo
                             break
                     if not check:  # Si el token no coincide, se evalúan individualmente
                         i = 0
@@ -221,8 +221,8 @@ def analizador_lexico(codigo, salida):
                             #print(char)
                             if char in tokens.values():
                                 keys = [key for key, val in tokens.items() if val == char]
-                                output_file.write(f"b<{keys[0]}, {fila}, {columna - len(value) + i}>\n")  # Escribe el token en el archivo
-                                #columna+=1  
+                                output_file.write(f"<{keys[0]}, {fila}, {inicio_numero + i}>\n")  # Escribe el token en el archivo
+                                i+=1 
             
                 # Validacion de comentario multilínea
                 if '"""' in linea or "'''" in linea:
