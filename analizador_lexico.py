@@ -145,6 +145,8 @@ def analizador_lexico(codigo, salida):
 
     lineas = codigo.split('\n')  # Divide el código en líneas
     
+    lista_tokens = sorted(tokens.items(), key=lambda x: len(x[1]), reverse=True)  # Ordena los tokens en una lista por longitud descendente
+
     # Abre el archivo de salida para escribir los resultados
     with open(salida, 'w', encoding='utf-8') as output_file:
         for linea in lineas: 
@@ -206,23 +208,15 @@ def analizador_lexico(codigo, salida):
                 
                 #Validacion de Token
                 if es_token(char):  # Si el carácter es un token válido
-                    check = False #Bandera para revisar si los dos tokens en conjunto indican otro token
                     inicio_numero = columna
                     while columna < len(linea) and es_token(linea[columna]):  # Detectar todo el identificador
                         columna += 1  
-                    for token, value in tokens.items():
-                        if linea[inicio_numero-1:columna] == value:  # Si el token coincide
-                            check = True
-                            output_file.write(f"<{token}, {fila}, {columna - len(value) + 1}>\n")  # Escribe el token en el archivo
+                    tk_string = linea[inicio_numero-1:columna]
+                    for nombre, simbolo in lista_tokens:
+                        if tk_string.startswith(simbolo): #Detectar la subsecuencia más larga de tokens
+                            output_file.write(f"<{nombre}, {fila}, {inicio_numero}>\n")  # Escribe el token en el archivo
+                            columna = (inicio_numero + len(simbolo)-1)  # Actualiza la columna
                             break
-                    if not check:  # Si el token no coincide, se evalúan individualmente
-                        i = 0
-                        for char in linea[inicio_numero-1:columna]: 
-                            #print(char)
-                            if char in tokens.values():
-                                keys = [key for key, val in tokens.items() if val == char]
-                                output_file.write(f"<{keys[0]}, {fila}, {inicio_numero + i}>\n")  # Escribe el token en el archivo
-                                i+=1 
             
                 # Validacion de comentario multilínea
                 if '"""' in linea or "'''" in linea:
