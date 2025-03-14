@@ -25,7 +25,7 @@ txt con el análisis léxico del mismo como salida.
 3. Ejecuta el siguiente comando:
 
 ```
-python3 analizador.py codigo.py
+python3 analizador_lexico.py codigo.py
 ```
 
 Los resultados del analizador léxico se guardan en el archivo de salida "resultado_lexico.txt"
